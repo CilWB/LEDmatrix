@@ -6,6 +6,7 @@
 	 .balign 4	
 Intro: 	 .asciz  "Raspberry Pi wiringPi blink test\n"
 ErrMsg:	 .asciz	"Setup didn't work... Aborting...\n"
+errMsg:	 .asciz	"Something wrong with FILE\n"
 pin: .int 20
 row:	.int	25,24,23,22,21,30,14,13
 rrow:	.int 	0

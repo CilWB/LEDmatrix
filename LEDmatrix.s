@@ -13,6 +13,7 @@ rrow:	.int 	0
 col:	.int	29,28,27,26,31,11,10,6
 ccol:	.int 	0
 delayMs: .int	1
+blackMs: .int	750
 testPrint: .asciz "%d\n"
 fileName: .asciz "kaew.txt"
 buffer: .byte 72
@@ -119,27 +120,28 @@ setPinMode:
 	
 run:
 	BL cls
-	//BL openFile
-	//ldr r9,=buffer
+	BL openFile
+	ldr r9,=buffer
+	BL byteToInt
 	//BL showBuffer
-	//BL byteToInt
 
 	//B testAll
 	//B exit
 	
 	mov r0,#0
-xx:	
-	cmp r0,#300
-	BEQ xx_cls
-	ldr r9,=xPic
-	BL x	//
+loop:	
+	cmp r0,#200
+	BEQ loop_cls
+	ldr r9,=bufferInt
+	BL showBuffer	
 	add r0,r0,#1
-	b xx
-xx_cls:
-	mov r0,#1000
+	b loop
+loop_cls:
+	ldr r0,=blackMs
+	ldr r0,[r0]
 	BL delay
 	mov r0,#0
-	b xx
+	b loop
 
 	B exit
 	
@@ -277,6 +279,7 @@ testAll_:
 	bl digitalWrite
 	
 	add r5,r5,#4
+	
 	b testAll_
 @ test X
 x:
@@ -349,7 +352,7 @@ showBuffer:
 	mov r5,#0		@ counter
 	ldr r10,=row	@ address row
 	ldr r11,=col	@ address column
-	mov r2,r9		@ store address of data in r2
+	mov r2,r9
 	ldr r0,[r10,#0]
 	mov r1,#1
 	bl digitalWrite
@@ -360,15 +363,15 @@ showBuffer:
 _showBuffer:
 
 	
-	cmp r5,#256				@ we use [0,4,8,12....,252] for indexing data from array size 8*8
+	cmp r5,#256		@ we use [0,4,8,12....,252] for indexing data from array size 8*8
 	BGT showBuffer_			@ when process finish all LED
-	/*
-	mov r1,r5				@ test print indexing of array
-	ldr r0,=testPrint
-	BL printf
-	*/
+	
+	//mov r1,r5
+	//ldr r0,=testPrint	@ test print indexing of array
+	//BL printf
+	
 	cmp r5,r7
-	BLEQ row_showBuffer 
+	BLEQ row_showBuffer
 	
 	SUB r3,r5,r4
 	

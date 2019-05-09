@@ -96,8 +96,8 @@ main:
 	b	exit
 init:
 	@pinMode row,col -> OUTPUT
-	ldr r0,=hello
-	bl printf
+	//ldr r0,=hello
+	//bl printf
 	mov r5,#0
 
 	ldr r10,=row
@@ -119,28 +119,26 @@ setPinMode:
 	
 run:
 	BL cls
-	mov r0,#0
-	BL openFile
-	ldr r9,=buffer
+	//BL openFile
+	//ldr r9,=buffer
 	//BL showBuffer
-	BL byteToInt
+	//BL byteToInt
 
-
-	//b exit
 	//B testAll
+	//B exit
+	
+	mov r0,#0
 xx:	
-	cmp r0,#75
+	cmp r0,#300
 	BEQ xx_cls
-	ldr r9,=bufferInt
+	ldr r9,=xPic
 	BL x	//
 	add r0,r0,#1
 	b xx
 xx_cls:
-	BL cls
 	mov r0,#1000
 	BL delay
 	mov r0,#0
-	
 	b xx
 
 	B exit

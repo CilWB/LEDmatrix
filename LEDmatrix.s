@@ -8,12 +8,14 @@ Intro: 	 .asciz  "Raspberry Pi wiringPi blink test\n"
 ErrMsg:	 .asciz	"Setup didn't work... Aborting...\n"
 pin: .int 20
 row:	.int	25,24,23,22,21,30,14,13
-rrow:	.int 0
+rrow:	.int 	0
 col:	.int	29,28,27,26,31,11,10,6
-ccol:	.int 0
+ccol:	.int 	0
 delayMs: .int	1
-OUTPUT	 =	1
 testPrint: .asciz "%d\n"
+fileName: .asciz "helloCil.txt"
+buffer: .byte 72
+filePosition: .word 0
 
 hello: .asciz "hello this is hello line.\n"
 na: .asciz "nani\n"
@@ -164,6 +166,52 @@ _cls:
 cls_:
 	pop {r0-r11,lr}
 	BX lr
+err:
+	//push {r0,lr}
+	ldr r0,=errMsg
+	bl printf
+	//pop {r0,lr}
+	//bx lr
+	b exit
+
+////////////////////////////////
+////	openFile function	////
+////////////////////////////////
+// when openFile is called	////
+// program open =fileName	////
+// and store in =buffer		////
+// buffer size is 72		////
+////////////////////////////////
+openFile:	
+	push {r0-r11,lr}
+	ldr r0,=fileName
+	mov r1,#0x42
+	mov r2,#384
+	mov r7,#5
+	swi 0
+	
+	cmp r0,#-1
+	beq err
+	
+	ldr r1,=filePosition
+	str r0,[r1]
+readFile:
+	ldr r0,=filePosition
+	ldr r0,[r0]
+	ldr r1,=buffer
+	mov r2,#72
+	mov r7,#3
+	swi 0
+	
+	@ test reading
+	//ldr r0,=buffer
+	//bl printf
+	//bl nani
+	
+	pop {r0-r11,lr}
+	bx lr
+
+
 	
 ////////////////////////////////////////////////
 ////////		debug function zone		////////

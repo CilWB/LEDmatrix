@@ -1,6 +1,6 @@
 	.data
 	.balign 4
-buffer: .space 32
+bufferFile: .space 32
 str: .space 10
 	
 	.text
@@ -11,7 +11,7 @@ main:
 	push {ip, lr}
 	ldr r4, [r1, #4]
 	mov r5, #0
-	ldr r7, =str
+	ldr r7, =bufferFile
 loopArgu:
 	ldrb r6, [r4, r5]
 	cmp r6,#0

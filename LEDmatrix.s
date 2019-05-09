@@ -7,6 +7,7 @@
 Intro: 	 .asciz  "Raspberry Pi wiringPi blink test\n"
 ErrMsg:	 .asciz	"Setup didn't work... Aborting...\n"
 errMsg:	 .asciz	"Something wrong with FILE\n"
+bufferFile: .space 32
 pin: .int 20
 row:	.int	25,24,23,22,21,30,14,13
 rrow:	.int 	0
@@ -18,7 +19,7 @@ testPrint: .asciz "%d\n"
 fileName: .asciz "kaew.txt"
 buffer: .byte 72
 filePosition: .word 0
-
+numArg: .int 0
 
 hello: .asciz "hello this is hello line.\n"
 na: .asciz "nani\n"
@@ -40,15 +41,7 @@ xPic1:
  	.int 1,1,0,1,1,0,1,1
  	.int 1,0,1,1,1,1,0,1
  	.int 0,1,1,1,1,1,1,0
- cxz:
- 	.int 1,1,1,1,1,1,1,1
- 	.int 1,0,0,0,1,0,0,0
- 	.int 1,0,1,1,1,1,0,1
- 	.int 1,0,0,0,1,0,1,1
- 	.int 1,1,1,1,0,0,0,0
- 	.int 0,1,0,1,1,1,1,1
- 	.int 1,0,1,1,1,1,1,1
- 	.int 0,1,0,1,1,1,1,1
+ //cxz:
  heart:
 	.int 1,0,1,1,1,1,0,1
 	.int 0,0,0,1,1,0,0,0
@@ -67,15 +60,25 @@ square:
 	.int 0,1,0,0,0,0,1,0
 	.int 0,0,1,1,1,1,0,0
 	.int 0,0,0,1,1,0,0,0
+bufferInt1:
+	.int 1,0,1,0,1,0,1,0
+	.int 0,1,0,1,0,1,0,1
+	.int 1,0,1,0,1,0,1,0
+	.int 0,1,0,1,0,1,0,1
+	.int 1,0,1,0,1,0,1,0
+	.int 0,1,0,1,0,1,0,1
+	.int 1,0,1,0,1,0,1,0
+	.int 0,1,0,1,0,1,0,1
 bufferInt:
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
-	.int 0,0,0,0,0,0,0,0
+	.int 1,0,0,0,0,0,0,1
+	.int 0,1,1,1,1,1,1,0
+	.int 0,1,0,1,1,0,1,0
+	.int 0,1,1,1,1,1,1,0
+	.int 0,1,0,1,1,0,1,0
+	.int 0,1,0,0,0,0,1,0
+	.int 0,1,1,1,1,1,1,0
+	.int 1,0,0,0,0,0,0,1
+alphabet: .word bufferInt,square
 @ ---------------------------------------
 @	Code Section
 @ ---------------------------------------
@@ -88,7 +91,29 @@ bufferInt:
 	.extern digitalWrite
 	.extern pinMode
 	
-main:   
+main:
+	push {ip, lr}
+	
+	ldr r5,=numArg
+	str r0,[r5]
+	cmp r0,#1
+	BEQ setWiringPi
+	ldr r4, [r1, #4]
+	mov r5, #0
+	ldr r7, =bufferFile
+loopArgu:
+	ldrb r6, [r4, r5]
+	cmp r6,#0
+	beq exitArgu
+	strb r6, [r7, r5]
+	add r5, r5, #1
+	b loopArgu
+exitArgu:
+	mov r0, r7
+	bl printf
+	
+	
+setWiringPi:
 	bl	wiringPiSetup
 	cmp	r0, #-1
 	bne	init
@@ -97,10 +122,7 @@ main:
 	b	exit
 init:
 	@pinMode row,col -> OUTPUT
-	//ldr r0,=hello
-	//bl printf
 	mov r5,#0
-
 	ldr r10,=row
 	ldr r11,=col
 	
@@ -120,6 +142,12 @@ setPinMode:
 	
 run:
 	BL cls
+	
+	ldr r1,=numArg
+	ldr r1,[r1]
+	cmp r1,#1
+	BEQ startLoop
+	
 	BL openFile
 	ldr r9,=buffer
 	BL byteToInt
@@ -128,12 +156,13 @@ run:
 	//B testAll
 	//B exit
 	
+startLoop:
 	mov r0,#0
 loop:	
 	cmp r0,#200
 	BEQ loop_cls
 	ldr r9,=bufferInt
-	BL showBuffer	
+	BL x	
 	add r0,r0,#1
 	b loop
 loop_cls:
@@ -152,7 +181,8 @@ loop_cls:
 ////////	useful functions	////////
 ////////////////////////////////////////
 
-exit:	
+exit:		
+	pop {ip, pc}
 	mov r7,#1
 	swi 0
 	
@@ -202,7 +232,7 @@ err:
 ////////////////////////////////
 openFile:	
 	push {r0-r11,lr}
-	ldr r0,=fileName
+	ldr r0,=bufferFile
 	mov r1,#0x42
 	mov r2,#384
 	mov r7,#5

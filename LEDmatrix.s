@@ -62,7 +62,6 @@ xPic1:
  	.int 1,1,0,1,1,0,1,1
  	.int 1,0,1,1,1,1,0,1
  	.int 0,1,1,1,1,1,1,0
- //cxz:
  heart:
 	.int 1,1,1,1,1,1,1,1
 	.int 1,0,0,1,1,0,0,1
@@ -143,9 +142,20 @@ list: .word check1,check0,chess,heart,square,xPic,xPic1,sad,smile,grade
 	
 main:
 	push {ip, lr}
-	
 	ldr r5,=numArg
 	str r0,[r5]
+@case 4 argument
+	cmp r0,#4
+	BNE checkArgu
+	ldr r5,[r1,#12]
+	ldrb r5,[r5]
+	//ldr r0,=testPrintC
+	//mov r1,r5
+	//bl printf
+	//b exit
+	cmp r5,#98				@ case ./LEDmatrix _X_ _XXXX_ b
+	BLEQ black
+checkArgu:
 @case 1 argument
 	cmp r0,#1				@ case ./LEDmatrix
 	BEQ setWiringPi
@@ -328,7 +338,15 @@ err:
 	//pop {r0,lr}
 	//bx lr
 	b exit
-
+black:
+	push {r0-r11,lr}
+	
+	ldr r0,=blackMs
+	mov r1,#750
+	str r1,[r0]
+	
+	pop {r0-r11,lr}
+	BX lr
 ////////////////////////////////
 ////	openFile function	////
 ////////////////////////////////
@@ -391,6 +409,8 @@ back:
 	pop {r0-r11,lr}
 	bx lr
 //end byte to int//////////////////////////////
+
+//start paste //////////////////////////////
 paste:
 	push {r0-r11,lr}
 	ldr r10,=bufferInt
@@ -408,6 +428,8 @@ _paste:
 paste_:
 	pop {r0-r11,lr}
 	bx lr
+//stop paste //////////////////////////////
+
 ////////////////////////////////////////////////
 ////////		debug function zone		////////
 ////////////////////////////////////////////////

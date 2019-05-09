@@ -193,10 +193,10 @@ err:
 ////////////////////////////////
 ////	openFile function	////
 ////////////////////////////////
-// when openFile is called	////
-// program open =fileName	////
-// and store in =buffer		////
-// buffer size is 72		////
+/// when openFile is called	////
+/// program open =fileName	////
+/// and store in =buffer	////
+/// buffer size is 72		////
 ////////////////////////////////
 openFile:	
 	push {r0-r11,lr}

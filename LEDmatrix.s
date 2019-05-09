@@ -14,9 +14,10 @@ col:	.int	29,28,27,26,31,11,10,6
 ccol:	.int 	0
 delayMs: .int	1
 testPrint: .asciz "%d\n"
-fileName: .asciz "helloCil.txt"
+fileName: .asciz "kaew.txt"
 buffer: .byte 72
 filePosition: .word 0
+
 
 hello: .asciz "hello this is hello line.\n"
 na: .asciz "nani\n"
@@ -65,6 +66,15 @@ square:
 	.int 0,1,0,0,0,0,1,0
 	.int 0,0,1,1,1,1,0,0
 	.int 0,0,0,1,1,0,0,0
+bufferInt:
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
 @ ---------------------------------------
 @	Code Section
 @ ---------------------------------------
@@ -112,27 +122,27 @@ run:
 	mov r0,#0
 	BL openFile
 	ldr r9,=buffer
-	BL showBuffer
+	//BL showBuffer
+	BL byteToInt
 
 
-/*
 	//b exit
 	//B testAll
 xx:	
-	//cmp r0,#75
-	//BEQ xx_cls
-	ldr r9,=square
+	cmp r0,#75
+	BEQ xx_cls
+	ldr r9,=bufferInt
 	BL x	//
-	//add r0,r0,#1
-	//b xx
+	add r0,r0,#1
+	b xx
 xx_cls:
-	//BL cls
-	//mov r0,#1000
-	//BL delay
-	//mov r0,#0
+	BL cls
+	mov r0,#1000
+	BL delay
+	mov r0,#0
 	
 	b xx
-*/
+
 	B exit
 	
 
@@ -212,14 +222,37 @@ readFile:
 	swi 0
 	
 	@ test reading
-	//ldr r0,=buffer
-	//bl printf
+	ldr r0,=buffer
+	bl printf
 	//bl nani
 	
 	pop {r0-r11,lr}
 	bx lr
 
-
+byteToInt:
+	push {r0-r11,lr}
+	mov r5,#0
+	mov r6,#0
+	ldr r10,=bufferInt
+_byteToInt:	
+	cmp r5,#72
+	BEQ back
+	
+	//ldr r0,=testPrint
+	ldrb r1,[r9,r5]
+	//bl printf
+	sub r1,r1,#48
+	cmp r1,#0
+	BLT next
+	
+	str r1,[r10,r6]
+	add r6,r6,#4
+next:
+	add r5,r5,#1
+	B _byteToInt
+back:	
+	pop {r0-r11,lr}
+	bx lr
 	
 ////////////////////////////////////////////////
 ////////		debug function zone		////////

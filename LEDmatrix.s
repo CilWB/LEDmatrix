@@ -15,14 +15,35 @@ col:	.int	29,28,27,26,31,11,10,6
 ccol:	.int 	0
 delayMs: .int	1
 blackMs: .int	750
-testPrint: .asciz "%d\n"
+testPrint: .asciz "%d_\n"
+testPrintC: .asciz "%c_\n"
+
 fileName: .asciz "kaew.txt"
 buffer: .byte 72
 filePosition: .word 0
 numArg: .int 0
+case: .int 0
 
 hello: .asciz "hello this is hello line.\n"
 na: .asciz "nani\n"
+check0:
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+	.int 0,0,0,0,0,0,0,0
+check1:
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
+	.int 1,1,1,1,1,1,1,1
 xPic:
  	.int 1,0,0,0,0,0,0,1
 	.int 0,1,0,0,0,0,1,0
@@ -60,7 +81,7 @@ square:
 	.int 0,1,0,0,0,0,1,0
 	.int 0,0,1,1,1,1,0,0
 	.int 0,0,0,1,1,0,0,0
-bufferInt1:
+chess:
 	.int 1,0,1,0,1,0,1,0
 	.int 0,1,0,1,0,1,0,1
 	.int 1,0,1,0,1,0,1,0
@@ -78,7 +99,7 @@ bufferInt:
 	.int 0,1,0,0,0,0,1,0
 	.int 0,1,1,1,1,1,1,0
 	.int 1,0,0,0,0,0,0,1
-alphabet: .word bufferInt,square
+list: .word check0,check1,chess
 @ ---------------------------------------
 @	Code Section
 @ ---------------------------------------
@@ -96,9 +117,61 @@ main:
 	
 	ldr r5,=numArg
 	str r0,[r5]
-	cmp r0,#1
+@case 1 argument
+	cmp r0,#1				@ case ./LEDmatrix
 	BEQ setWiringPi
-	ldr r4, [r1, #4]
+@case 2 arguments
+	cmp r0,#2				@ case ./LEDmatrix _fileName_
+	mov r2,#4				@ store 4 in r2 for indexing 2nd Argument as name 
+	BEQ readNameFile	
+@case 3 arguments
+	@ case arguments >= 3
+	ldr r5,[r1,#4]
+	ldrb r5,[r5]			@ r5 = int(char 2nd argument)
+	/*					
+	ldr r0,=testPrintC		@ print 2nd argument to check
+	BL printf
+	b exit
+	*/
+// case f
+	cmp r5,#102				@ case f _filename_
+	mov r2,#8
+	BEQ readNameFile
+// case l	
+	cmp r5,#108				@ case l _num_
+	mov r10,#4
+	ldr r9,=case
+	str r10,[r9]
+	
+	ldr r5,[r1,#8]
+	ldrb r5,[r5]
+	sub r5,r5,#48
+	
+	/*
+	ldr r0,=testPrint	@ print argument 3 to check in l option
+	mov r1,r5
+	bl printf
+	
+	ldr r7,=bufferInt
+	ldr r6,=list
+	mov r8,#4
+	mov r9,r5
+	mul r5,r9,r8
+	ldr r9,[r6,r5]
+	str r4,[r7]
+	*/
+	ldr r6,=list
+	mov r8,#4
+	mov r9,r5
+	mul r5,r9,r8
+	ldr r9,[r6,r5]
+	bl paste
+	
+	BEQ setWiringPi
+	B exit
+	
+readNameFile:
+	ldr r4, [r1, r2]	@ r1+8 = pointer 2nd argument
 	mov r5, #0
 	ldr r7, =bufferFile
 loopArgu:
@@ -146,6 +219,11 @@ run:
 	ldr r1,=numArg
 	ldr r1,[r1]
 	cmp r1,#1
+	BEQ startLoop
+	
+	ldr r1,=case
+	ldr r1,[r1]
+	cmp r1,#4
 	BEQ startLoop
 	
 	BL openFile
@@ -258,7 +336,7 @@ readFile:
 	
 	pop {r0-r11,lr}
 	bx lr
-
+///byte to int//////////////////////////
 byteToInt:
 	push {r0-r11,lr}
 	mov r5,#0
@@ -283,7 +361,24 @@ next:
 back:	
 	pop {r0-r11,lr}
 	bx lr
+//end byte to int//////////////////////////////
+paste:
+	push {r0-r11,lr}
+	ldr r10,=bufferInt
+	mov r0,#0
+_paste:
+	cmp r0,#256
+	BEQ paste_
 	
+	ldr r1,[r9,r0]
+	str r1,[r10,r0]
+	
+	
+	ADD r0,r0,#4
+	B _paste
+paste_:
+	pop {r0-r11,lr}
+	bx lr
 ////////////////////////////////////////////////
 ////////		debug function zone		////////
 ////////////////////////////////////////////////

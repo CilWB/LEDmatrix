@@ -110,6 +110,12 @@ setPinMode:
 run:
 	BL cls
 	mov r0,#0
+	BL openFile
+	ldr r9,=buffer
+	BL showBuffer
+
+
+/*
 	//b exit
 	//B testAll
 xx:	
@@ -126,6 +132,7 @@ xx_cls:
 	//mov r0,#0
 	
 	b xx
+*/
 	B exit
 	
 

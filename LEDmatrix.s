@@ -128,6 +128,39 @@ grade:
 	.int 1,0,0,1,1,0,0,1
 
 list: .word check1,check0,chess,heart,square,xPic,xPic1,sad,smile,grade
+
+a:
+.int 1,1,1,1,1,1,1,1
+.int 1,1,1,1,1,1,1,1
+.int 1,1,0,0,0,0,1,1
+.int 1,1,1,1,1,0,1,1
+.int 1,1,0,0,0,0,1,1
+.int 1,1,0,1,1,0,1,1
+.int 1,1,0,0,0,0,0,1
+.int 1,1,1,1,1,1,1,1
+b:
+.int 1,1,1,1,1,1,1,1
+.int 1,1,0,1,1,1,1,1
+.int 1,1,0,1,1,1,1,1
+.int 1,1,0,0,0,0,1,1
+.int 1,1,0,1,1,0,1,1
+.int 1,1,0,1,1,0,1,1
+.int 1,1,0,0,0,0,1,1
+.int 1,1,1,1,1,1,1,1
+
+c:
+.int 1,1,1,1,1,1,1,1
+.int 1,1,1,1,1,1,1,1
+.int 1,0,0,0,0,0,1,1
+.int 1,0,1,1,1,1,1,1
+.int 1,0,1,1,1,1,1,1
+.int 1,0,1,1,1,1,1,1
+.int 1,0,0,0,0,0,1,1
+.int 1,1,1,1,1,1,1,1
+
+
+alphabet: .word a,b,c
+
 @ ---------------------------------------
 @	Code Section
 @ ---------------------------------------
@@ -174,10 +207,11 @@ checkArgu:
 	*/
 // case f
 	cmp r5,#102				@ case f _filename_
-	mov r2,#8
+	moveq r2,#8
 	BEQ readNameFile
 // case l	
 	cmp r5,#108				@ case l _num_
+	bne case_a
 	mov r10,#4
 	ldr r9,=case
 	str r10,[r9]
@@ -186,19 +220,6 @@ checkArgu:
 	ldrb r5,[r5]
 	sub r5,r5,#48
 	
-	/*
-	ldr r0,=testPrint	@ print argument 3 to check in l option
-	mov r1,r5
-	bl printf
-	
-	ldr r7,=bufferInt
-	ldr r6,=list
-	mov r8,#4
-	mov r9,r5
-	mul r5,r9,r8
-	ldr r9,[r6,r5]
-	str r4,[r7]
-	*/
 	ldr r6,=list
 	mov r8,#4
 	mov r9,r5
@@ -207,6 +228,34 @@ checkArgu:
 	bl paste
 	
 	BEQ setWiringPi
+// case a
+case_a:
+	cmp r5,#97				@ case a _num_
+	
+	mov r10,#3
+	ldr r9,=case
+	str r10,[r9]
+	
+	ldr r5,[r1,#8]
+	ldrb r5,[r5]
+	sub r5,r5,#97
+	/*
+	ldr r0,=testPrintC		@ print _num_ to check
+	mov r1,r5
+	BL printf
+	b exit
+	*/
+	
+	ldr r6,=alphabet
+	mov r8,#4
+	mov r9,r5
+	mul r5,r9,r8
+	ldr r9,[r6,r5]
+	bl paste
+	
+	BEQ setWiringPi
+	
+	
 	B exit
 	
 readNameFile:
@@ -263,6 +312,8 @@ run:
 	ldr r1,=case
 	ldr r1,[r1]
 	cmp r1,#4
+	BEQ startLoop
+	cmp r1,#3
 	BEQ startLoop
 	
 	BL openFile

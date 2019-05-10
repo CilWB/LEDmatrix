@@ -17,6 +17,7 @@ delayMs: .int	1
 blackMs: .int	0
 testPrint: .asciz "%d_\n"
 testPrintC: .asciz "%c_\n"
+testPrintS: .asciz "%s_\n"
 
 fileName: .asciz "kaew.txt"
 buffer: .byte 72
@@ -231,7 +232,7 @@ checkArgu:
 // case a
 case_a:
 	cmp r5,#97				@ case a _num_
-	
+	bne case_s
 	mov r10,#3
 	ldr r9,=case
 	str r10,[r9]
@@ -254,9 +255,24 @@ case_a:
 	bl paste
 	
 	BEQ setWiringPi
+// case s
+case_s:
+	cmp r5,#115				@ case s _String_
+	BNE exit
+	
+	mov r10,#2
+	ldr r9,=case
+	str r10,[r9]
+	
+	mov r2,#8
+	/*
+	ldr r0,=testPrintC		@ print _num_ to check
+	mov r1,r5
+	BL printf
+	b exit
+	*/
 	
 	
-	B exit
 	
 readNameFile:
 	ldr r4, [r1, r2]	@ r1+8 = pointer 2nd argument
@@ -270,8 +286,8 @@ loopArgu:
 	add r5, r5, #1
 	b loopArgu
 exitArgu:
-	mov r0, r7
-	bl printf
+	//mov r0, r7	
+	//bl printf
 	
 	
 setWiringPi:
@@ -315,6 +331,8 @@ run:
 	BEQ startLoop
 	cmp r1,#3
 	BEQ startLoop
+	cmp r1,#2
+	BEQ stringLoop
 	
 	BL openFile
 	ldr r9,=buffer
@@ -342,7 +360,11 @@ loop_cls:
 
 	B exit
 	
-
+stringLoop:
+	ldr r0,=testPrintS
+	ldr r1,=bufferFile
+	BL printf
+	b exit
 	
 
 ////////////////////////////////////////

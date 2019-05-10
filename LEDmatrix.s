@@ -8,6 +8,7 @@ Intro: 	 .asciz  "Raspberry Pi wiringPi blink test\n"
 ErrMsg:	 .asciz	"Setup didn't work... Aborting...\n"
 errMsg:	 .asciz	"Something wrong with FILE\n"
 bufferFile: .space 32
+lenBufferFile: .int 0
 pin: .int 20
 row:	.int	25,24,23,22,21,30,14,13
 rrow:	.int 	0
@@ -117,7 +118,7 @@ sad:
 	.int 0,1,0,1,1,0,1,0
 	.int 0,1,1,1,1,1,1,0
 	.int 1,0,0,0,0,0,0,1
-@I'm goint to get this T^T
+@I'm goint to get this :D
 grade:
 	.int 1,1,1,0,0,1,1,1
 	.int 1,1,0,0,0,0,1,1
@@ -286,8 +287,12 @@ loopArgu:
 	add r5, r5, #1
 	b loopArgu
 exitArgu:
-	//mov r0, r7	
+	push {r0-r11}
+	ldr r0,=lenBufferFile
+	str r5,[r0]
+	//mov r0, r5	
 	//bl printf
+	pop {r0-r11}
 	
 	
 setWiringPi:
@@ -361,11 +366,57 @@ loop_cls:
 	B exit
 	
 stringLoop:
-	ldr r0,=testPrintS
+/*
+	ldr r0,=testPrintS		@ test print bufferFile in string
 	ldr r1,=bufferFile
 	BL printf
-	b exit
 	
+	ldr r0,=testPrint		@ test print buffer size in string
+	ldr r1,=lenBufferFile
+	ldr r1,[r1]
+	BL printf
+	//b exit
+*/
+	ldr r4,=lenBufferFile
+	ldr r4,[r4]
+	mov r5,#0
+	ldr r6,=bufferFile
+	ldr r7,=alphabet
+_stringLoop:
+
+		cmp r5,r4
+		beq exit
+		ldrb r1,[r6,r5]
+		/*
+		push {r0-r11}
+		ldr r0,=testPrintC
+		bl printf
+		pop {r0-r11}
+		*/
+		sub r1,r1,#97
+		mov r8,#4
+		MUL r9,r1,r8
+		ldr r9,[r7,r9]
+		
+		push {r0-r11}
+		mov r0,#0
+timeString:
+		cmp r0,#200
+		beq timeStringNext
+		bl x
+		add r0,r0,#1
+		b timeString
+timeStringNext:		
+		pop {r0-r11}
+		
+		add r5,r5,#1
+		b _stringLoop
+
+
+
+
+
+
 
 ////////////////////////////////////////
 ////////	useful functions	////////
@@ -573,7 +624,7 @@ row_x:
 	add r4,r4,#32
 	push {lr}
 	
-	//mov r0,#5
+	//mov r0,#50
 	BL delay5
 	
 	ldr r0,[r10,r6]
